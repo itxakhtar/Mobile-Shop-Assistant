@@ -1,4 +1,4 @@
- import os
+import os
 import streamlit as st
 from groq import Groq
 from dotenv import load_dotenv
@@ -64,10 +64,9 @@ def text_to_speech(text):
     def speak():
         try:
             engine = pyttsx3.init()
-            engine.setProperty('rate', 180)  # Speed of speech
-            engine.setProperty('volume', 0.9)  # Volume (0-1)
+            engine.setProperty('rate', 180)
+            engine.setProperty('volume', 0.9)
             
-            # Set voice to a more natural one if available
             voices = engine.getProperty('voices')
             for voice in voices:
                 if 'english' in voice.name.lower() or 'us' in voice.name.lower():
@@ -80,7 +79,6 @@ def text_to_speech(text):
         except Exception as e:
             st.warning(f"Voice synthesis failed: {str(e)}")
     
-    # Run in a separate thread to not block the UI
     threading.Thread(target=speak, daemon=True).start()
 
 # -----------------------------
@@ -117,20 +115,6 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
     }
     
-    /* User messages */
-    [data-testid="stChatMessage"]:has(.user) {
-        background: linear-gradient(90deg, #6b46c1, #7c3aed);
-        color: white;
-        border-bottom-right-radius: 4px;
-    }
-    
-    /* Assistant messages */
-    [data-testid="stChatMessage"]:has(.assistant) {
-        background: #16161f;
-        border: 1px solid #2a2a3a;
-        border-bottom-left-radius: 4px;
-    }
-
     /* Title */
     .main-title {
         font-size: 3.4rem;
@@ -243,14 +227,17 @@ with st.sidebar:
 def analyze_sentiment(text):
     try:
         polarity = TextBlob(text).sentiment.polarity
-        if polarity > 0.2: return "positive"
-        elif polarity < -0.2: return "negative"
+        if polarity > 0.2:
+            return "positive"
+        elif polarity < -0.2:
+            return "negative"
         return "neutral"
     except:
         return "neutral"
 
 def extract_entities(text):
-    if nlp is None: return []
+    if nlp is None:
+        return []
     try:
         doc = nlp(text)
         return [(ent.text, ent.label_) for ent in doc.ents]
@@ -259,12 +246,18 @@ def extract_entities(text):
 
 def detect_intent(text):
     text = text.lower()
-    if any(word in text for word in ["hi", "hello", "hey", "greetings"]): return "greeting"
-    elif any(word in text for word in ["price", "cost", "rate", "how much"]): return "price_inquiry"
-    elif any(word in text for word in ["spec", "specification", "features", "details"]): return "specification_request"
-    elif any(word in text for word in ["recommend", "best", "suggest", "top", "good"]): return "recommendation"
-    elif any(word in text for word in ["compare", "vs", "versus", "difference"]): return "comparison"
-    elif any(word in text for word in ["bye", "thank", "thanks", "goodbye"]): return "farewell"
+    if any(word in text for word in ["hi", "hello", "hey", "greetings"]):
+        return "greeting"
+    elif any(word in text for word in ["price", "cost", "rate", "how much"]):
+        return "price_inquiry"
+    elif any(word in text for word in ["spec", "specification", "features", "details"]):
+        return "specification_request"
+    elif any(word in text for word in ["recommend", "best", "suggest", "top", "good"]):
+        return "recommendation"
+    elif any(word in text for word in ["compare", "vs", "versus", "difference"]):
+        return "comparison"
+    elif any(word in text for word in ["bye", "thank", "thanks", "goodbye"]):
+        return "farewell"
     return "general_query"
 
 # -----------------------------
@@ -346,7 +339,6 @@ if prompt:
             full_response = "⚠️ I'm currently unable to connect. Please check the API configuration and try again."
         else:
             try:
-                # Show typing indicator
                 with st.spinner("Lumina is thinking..."):
                     stream = client.chat.completions.create(
                         model="llama-3.1-8b-instant",
@@ -392,18 +384,3 @@ st.markdown(f"""
     🟢 Jarvis Active | Voice {'ON' if voice_enabled else 'OFF'}
 </div>
 """, unsafe_allow_html=True)
-
-# -----------------------------
-# Requirements.txt content for deployment
-# -----------------------------
-requirements_text = """
-streamlit
-groq
-python-dotenv
-spacy
-textblob
-pyttsx3
-"""
-
-# Note: For deployment, create a requirements.txt file with the above packages
-# Also run: python -m spacy download en_core_web_sm
