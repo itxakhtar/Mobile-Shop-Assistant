@@ -93,7 +93,7 @@ st.markdown("""
         font-family: 'Space Grotesk', sans-serif;
         font-size: 4.2rem;
         font-weight: 700;
-        background: linear-gradient(90deg, #a855f7, #3b82f6, #22d3ee);
+        background: linear-gradient(90deg, #c026d3, #7c3aed, #db2777);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
