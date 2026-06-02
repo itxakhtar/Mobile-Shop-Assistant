@@ -3,3 +3,4 @@ groq
 python-dotenv
 spacy
 textblob
+pyttsx3
