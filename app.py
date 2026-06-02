@@ -74,16 +74,78 @@ st.markdown("""
         transform: translateY(-3px);
     }
 
-    .stChatMessage[data-testid="stChatMessage"][role="user"] {
-        background: linear-gradient(135deg, #3B82F6, #6366F1);
-        color: white;
+    /* User messages */
+    [data-testid="stChatMessage"]:has(div[data-testid="stChatMessageContent"]) {
+        background: linear-gradient(135deg, #3B82F6, #6366F1) !important;
+        color: white !important;
         margin-left: 12%;
     }
 
-    .stChatMessage[data-testid="stChatMessage"][role="assistant"] {
-        background: #1E293B;
-        color: #E2E8F0;
+    /* Assistant messages container */
+    [data-testid="stChatMessage"]:has(div[data-testid="stChatMessageContent"]) + div {
+        background: #1E293B !important;
+        color: #E2E8F0 !important;
         margin-right: 12%;
+    }
+    
+    /* Force white text for ALL chat content */
+    [data-testid="stChatMessage"] {
+        color: #FFFFFF !important;
+    }
+    
+    [data-testid="stChatMessage"] p,
+    [data-testid="stChatMessage"] div,
+    [data-testid="stChatMessage"] span,
+    [data-testid="stChatMessage"] li,
+    [data-testid="stChatMessage"] td,
+    [data-testid="stChatMessage"] th,
+    [data-testid="stChatMessage"] strong,
+    [data-testid="stChatMessage"] em {
+        color: #FFFFFF !important;
+    }
+    
+    /* Blue accent for assistant responses - specific links and highlights */
+    [data-testid="stChatMessage"]:has(div[data-testid="stChatMessageContent"]) a,
+    [data-testid="stChatMessage"]:has(div[data-testid="stChatMessageContent"]) strong,
+    [data-testid="stChatMessage"]:has(div[data-testid="stChatMessageContent"]) em {
+        color: #60A5FA !important;
+    }
+    
+    /* Assistant message specific styling */
+    .stChatMessage [data-testid="stChatMessageContent"] {
+        color: #E2E8F0 !important;
+    }
+    
+    /* Tables in assistant responses */
+    [data-testid="stChatMessage"] table {
+        color: #FFFFFF !important;
+        background-color: #1E293B !important;
+    }
+    
+    [data-testid="stChatMessage"] th {
+        background: linear-gradient(135deg, #3B82F6, #6366F1) !important;
+        color: white !important;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    
+    [data-testid="stChatMessage"] td {
+        background-color: #334155 !important;
+        color: #E2E8F0 !important;
+        padding: 8px;
+    }
+    
+    /* Code blocks */
+    [data-testid="stChatMessage"] code {
+        background-color: #0F172A !important;
+        color: #60A5FA !important;
+        padding: 2px 6px;
+        border-radius: 6px;
+    }
+    
+    [data-testid="stChatMessage"] pre {
+        background-color: #0F172A !important;
+        color: #E2E8F0 !important;
     }
 
     /* Buttons */
@@ -92,6 +154,7 @@ st.markdown("""
         height: 52px;
         font-weight: 600;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: white !important;
     }
 
     .stButton button:hover {
@@ -104,6 +167,13 @@ st.markdown("""
         background: #1E293B !important;
         border-right: 1px solid rgba(148, 163, 184, 0.1);
     }
+    
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] label {
+        color: #E2E8F0 !important;
+    }
 
     /* Input Field */
     .stChatInput input {
@@ -113,6 +183,10 @@ st.markdown("""
         border-radius: 9999px;
         padding: 16px 24px;
         font-size: 1.05rem;
+    }
+    
+    .stChatInput input::placeholder {
+        color: #94A3B8 !important;
     }
 
     /* Quick Pills */
@@ -135,6 +209,28 @@ st.markdown("""
 
     h1, h2, h3, label {
         color: #FFFFFF !important;
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background-color: #1E293B !important;
+        color: #60A5FA !important;
+    }
+    
+    .streamlit-expanderContent {
+        background-color: #0F172A !important;
+        color: #E2E8F0 !important;
+    }
+    
+    /* Status messages */
+    .stAlert {
+        background-color: #1E293B !important;
+        color: #E2E8F0 !important;
+    }
+    
+    /* Spinner text */
+    .stSpinner > div {
+        color: #60A5FA !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -169,7 +265,7 @@ def detect_intent(text):
 if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant",
-        "content": "Hello! I'm **Lumina** — your intelligent AI mobile advisor. How can I help you find the perfect smartphone today?"
+        "content": "Hello! I'm **Lumina** — your intelligent AI mobile advisor. How can I help you find the perfect smartphone today? 📱✨"
     }]
 
 # ====================== HERO SECTION ======================
@@ -183,11 +279,11 @@ st.markdown("### Popular Searches")
 pill_cols = st.columns(5)
 
 quick_prompts = [
-    ("🔥 Top Flagships 2026", "Recommend the best flagship phones in 2026"),
-    ("💰 Under 50K", "Best smartphones under 50000 PKR"),
-    ("📸 Camera Kings", "Best camera phones for photography in Pakistan"),
-    ("⚡ Gaming Beast", "Best gaming phones with high refresh rate"),
-    ("🌟 Value Picks", "Best value for money smartphones right now")
+    ("🔥 Top Flagships 2026", "Recommend the best flagship phones in 2026 with detailed specs"),
+    ("💰 Under 50K", "Best smartphones under 50000 PKR with value for money"),
+    ("📸 Camera Kings", "Best camera phones for photography in Pakistan with megapixel details"),
+    ("⚡ Gaming Beast", "Best gaming phones with high refresh rate and cooling systems"),
+    ("🌟 Value Picks", "Best value for money smartphones right now under 100K PKR")
 ]
 
 for i, (label, prompt) in enumerate(quick_prompts):
@@ -217,6 +313,7 @@ with st.sidebar:
 
     st.divider()
     st.markdown("### Settings")
+    voice_enabled = st.checkbox("🔊 Enable Voice Response", value=False)
     st.caption("Lumina v2.2 • Premium Experience")
 
 # ====================== CHAT INPUT ======================
@@ -242,19 +339,23 @@ if prompt:
     Speak elegantly with a touch of personality. Use emojis tastefully.
     Current sentiment: {sentiment}
     Detected intent: {intent}
-    Always mention key specs and current price ranges in PKR when recommending phones."""
+    Always mention key specs and current price ranges in PKR when recommending phones.
+    Format responses with proper markdown, use tables for comparisons, and bold text for important specs.
+    Be conversational but informative. Limit responses to 400 words max.
+    Use 📱, 🔥, 💰, ⚡, 📸 emojis where appropriate."""
 
     # Assistant response
     with chat_container:
         with st.chat_message("assistant"):
             if not client:
                 st.error("⚠️ Groq API key is missing. Please check your .env file.")
-                full_response = "API configuration error."
+                full_response = "API configuration error. Please add your Groq API key."
             else:
                 with st.spinner("Lumina is thinking..."):
                     try:
+                        # Updated to use the correct model name
                         stream = client.chat.completions.create(
-                            model="llama-3.1-70b-versatile",
+                            model="llama-3.3-70b-versatile",  # ✅ Fixed: Updated to active model
                             messages=[
                                 {"role": "system", "content": system_prompt},
                                 {"role": "user", "content": prompt}
