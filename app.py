@@ -80,13 +80,18 @@ st.set_page_config(
 )
 
 # -----------------------------
-# Enhanced Styling - Premium Graphic Design
+# Enhanced Styling - Fixed Text Colors
 # -----------------------------
 st.markdown("""
 <style>
+    /* Main background */
     .stApp {
         background: linear-gradient(135deg, #0a0a0f 0%, #1a1428 100%);
-        color: #ffffff;
+    }
+    
+    /* Make all default text white */
+    .stApp, .stMarkdown, .stTextInput, .stSelectbox, .stButton, p, h1, h2, h3, h4, h5, h6, span, div, label {
+        color: #ffffff !important;
     }
     
     /* Main Title */
@@ -103,14 +108,14 @@ st.markdown("""
     
     .subtitle {
         text-align: center;
-        color: #a5b4fc;
+        color: #a5b4fc !important;
         font-size: 1.25rem;
         margin-bottom: 2.5rem;
         font-weight: 400;
     }
 
-    /* Chat Messages - Glassmorphism */
-    .stChatMessage {
+    /* Chat Messages */
+    [data-testid="stChatMessage"] {
         border-radius: 20px;
         padding: 18px 22px;
         margin-bottom: 18px;
@@ -119,13 +124,66 @@ st.markdown("""
         backdrop-filter: blur(12px);
     }
     
-    .stChatMessage[data-testid="stChatMessage"][role="user"] {
-        background: linear-gradient(135deg, #4f46e5, #7c3aed);
-        color: white;
+    /* User messages - Light background with dark text OR dark background with light text */
+    [data-testid="stChatMessage"][data-testid="stChatMessage"]:has(div:contains("user")) {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
     }
     
-    .stChatMessage[data-testid="stChatMessage"][role="assistant"] {
-        background: rgba(30, 30, 46, 0.85);
+    [data-testid="stChatMessage"] [data-testid="stMarkdown"] {
+        color: #ffffff !important;
+    }
+    
+    /* Assistant messages - Dark background with WHITE text */
+    [data-testid="stChatMessage"]:has(div[data-testid="stChatMessageContent"]) {
+        background: rgba(30, 30, 46, 0.95) !important;
+    }
+    
+    /* Force white text in assistant responses */
+    [data-testid="stChatMessage"] [data-testid="stMarkdown"] p,
+    [data-testid="stChatMessage"] [data-testid="stMarkdown"] div,
+    [data-testid="stChatMessage"] [data-testid="stMarkdown"] span,
+    [data-testid="stChatMessage"] .stMarkdown {
+        color: #ffffff !important;
+    }
+    
+    /* Chat message content wrapper */
+    .stChatMessageContent {
+        color: #ffffff !important;
+    }
+    
+    /* Any text inside chat messages */
+    .stChatMessage p, 
+    .stChatMessage div,
+    .stChatMessage span,
+    .stChatMessage li,
+    .stChatMessage td,
+    .stChatMessage th {
+        color: #ffffff !important;
+    }
+    
+    /* Tables in responses */
+    .stChatMessage table, 
+    .stChatMessage th, 
+    .stChatMessage td {
+        color: #ffffff !important;
+        border-color: #6366f1 !important;
+    }
+    
+    .stChatMessage th {
+        background-color: #4f46e5 !important;
+    }
+    
+    /* Code blocks */
+    .stChatMessage code {
+        background-color: #1a1a2e !important;
+        color: #c084fc !important;
+        padding: 2px 6px;
+        border-radius: 6px;
+    }
+    
+    .stChatMessage pre {
+        background-color: #0a0a0f !important;
+        color: #e2e8f0 !important;
     }
 
     /* Sidebar */
@@ -135,7 +193,7 @@ st.markdown("""
         height: 54px;
         font-weight: 600;
         background: linear-gradient(90deg, #1f1f2e, #312e81);
-        color: white;
+        color: white !important;
         border: none;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -144,6 +202,15 @@ st.markdown("""
         transform: translateY(-3px) scale(1.02);
         box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
         background: linear-gradient(90deg, #6d28d9, #4f46e5);
+        color: white !important;
+    }
+    
+    /* Sidebar text */
+    .sidebar .stMarkdown, 
+    .sidebar p, 
+    .sidebar span,
+    .sidebar label {
+        color: #e0e7ff !important;
     }
 
     /* Input */
@@ -153,6 +220,10 @@ st.markdown("""
         border: 2px solid #4338ca !important;
         border-radius: 20px;
         padding: 14px 20px;
+    }
+    
+    .stChatInput input::placeholder {
+        color: #94a3b8 !important;
     }
 
     /* Status Indicator */
@@ -168,10 +239,39 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         z-index: 1000;
         font-family: 'Courier New', monospace;
+        color: #ffffff !important;
     }
 
+    /* Headers */
     h1, h2, h3 {
-        color: #e0e7ff;
+        color: #e0e7ff !important;
+    }
+    
+    /* Expander */
+    .streamlit-expanderHeader {
+        background-color: #1a1a2e !important;
+        color: #c084fc !important;
+    }
+    
+    .streamlit-expanderContent {
+        background-color: #0a0a0f !important;
+        color: #ffffff !important;
+    }
+    
+    /* Analysis JSON */
+    .stJson {
+        background-color: #0a0a0f !important;
+        color: #e2e8f0 !important;
+    }
+    
+    /* Links */
+    a {
+        color: #c084fc !important;
+    }
+    
+    /* Buttons */
+    .stButton button {
+        color: white !important;
     }
 </style>
 """, unsafe_allow_html=True)
