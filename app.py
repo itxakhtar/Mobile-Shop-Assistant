@@ -108,10 +108,9 @@ st.markdown("""
         transform: translateX(8px);
     }
 
-    /* ==================== POPULAR SEARCHES FIX ==================== */
+    /* ==================== POPULAR SEARCHES - RED TEXT IN ALL STATES ==================== */
     .popular-card button {
         background: #334155 !important;
-        color: #FFFFFF !important;
         border: 1px solid #475569 !important;
         border-radius: 18px;
         padding: 18px 20px;
@@ -121,39 +120,85 @@ st.markdown("""
         height: 100%;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        color: #FF0000 !important;  /* Red text - normal state */
     }
 
     .popular-card button:hover {
         background: linear-gradient(135deg, #3B82F6, #8B5CF6) !important;
-        color: #FFFFFF !important;
         transform: translateY(-6px);
         border-color: #60A5FA;
         box-shadow: 0 12px 25px rgba(59, 130, 246, 0.4);
+        color: #FF0000 !important;  /* Red text - hover state */
     }
 
-    /* Active / Clicked State */
-    .popular-card button:active,
-    .popular-card button:focus,
-    .popular-card button[data-testid="stButton"] {
+    .popular-card button:active {
         background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
-        color: #FFFFFF !important;
         border-color: #3B82F6;
+        color: #FF0000 !important;  /* Red text - active state */
     }
 
-    /* Force white text in ALL states */
+    .popular-card button:focus {
+        background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+        border-color: #3B82F6;
+        color: #FF0000 !important;  /* Red text - focus state */
+        outline: none;
+    }
+    
+    /* Force red text for all button states */
     .popular-card button * {
-        color: #FFFFFF !important;
+        color: #FF0000 !important;
     }
-
+    
     .popular-card button:hover *,
     .popular-card button:active *,
     .popular-card button:focus * {
-        color: #FFFFFF !important;
+        color: #FF0000 !important;
     }
-
-    /* Streamlit defaults override */
-    .stButton button, .stButton button p, .stButton button span {
-        color: #FFFFFF !important;
+    
+    /* Direct button styling - Most specific selectors */
+    .stButton > button {
+        color: #FF0000 !important;
+    }
+    
+    .stButton > button:hover {
+        color: #FF0000 !important;
+    }
+    
+    .stButton > button:focus {
+        color: #FF0000 !important;
+    }
+    
+    .stButton > button:active {
+        color: #FF0000 !important;
+    }
+    
+    [data-testid="stButton"] button {
+        color: #FF0000 !important;
+    }
+    
+    [data-testid="stButton"] button:hover {
+        color: #FF0000 !important;
+    }
+    
+    [data-testid="stButton"] button:focus {
+        color: #FF0000 !important;
+    }
+    
+    [data-testid="stButton"] button:active {
+        color: #FF0000 !important;
+    }
+    
+    /* Ensure text inside buttons stays red */
+    .stButton button p,
+    .stButton button span,
+    .stButton button div {
+        color: #FF0000 !important;
+    }
+    
+    /* Any clicked/selected state */
+    .stButton button:visited,
+    .stButton button:link {
+        color: #FF0000 !important;
     }
 
     /* Input */
@@ -232,7 +277,7 @@ with col2:
     st.markdown('<h1 class="main-title">LUMINA</h1>', unsafe_allow_html=True)
     st.markdown('<p class="subtitle">Premium AI Mobile Advisor • Powered by Groq • Real-time Intelligence</p>', unsafe_allow_html=True)
 
-# ====================== POPULAR SEARCHES (Fixed) ======================
+# ====================== POPULAR SEARCHES (RED TEXT FIXED) ======================
 st.markdown("### Popular Searches")
 
 cols = st.columns(5)
