@@ -2,267 +2,202 @@ import os
 import streamlit as st
 from groq import Groq
 from dotenv import load_dotenv
-import sys
-import subprocess
-import threading
-import time
-
-# Optional packages with graceful fallback
-try:
-    import spacy
-    from textblob import TextBlob
-except ImportError:
-    spacy = None
-    TextBlob = None
+from textblob import TextBlob
 
 load_dotenv()
 
-# -----------------------------
-# Spacy Model Download
-# -----------------------------
-@st.cache_resource
-def load_nlp_model():
-    if not spacy:
-        return None
-    try:
-        return spacy.load("en_core_web_sm")
-    except OSError:
-        try:
-            subprocess.check_call([sys.executable, "-m", "spacy", "download", "en_core_web_sm"])
-            return spacy.load("en_core_web_sm")
-        except:
-            return None
-
-nlp = load_nlp_model()
-
-# -----------------------------
-# Groq Client
-# -----------------------------
+# ====================== GROQ CLIENT ======================
 api_key = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=api_key) if api_key else None
 
-# -----------------------------
-# Text-to-Speech (Disabled by default on cloud)
-# -----------------------------
-def text_to_speech(text):
-    try:
-        import pyttsx3
-        def speak():
-            engine = pyttsx3.init()
-            engine.setProperty('rate', 172)
-            engine.setProperty('volume', 0.9)
-            voices = engine.getProperty('voices')
-            for voice in voices:
-                if 'english' in voice.name.lower():
-                    engine.setProperty('voice', voice.id)
-                    break
-            engine.say(text[:500])  # Limit length for performance
-            engine.runAndWait()
-        threading.Thread(target=speak, daemon=True).start()
-    except:
-        pass  # TTS not available on Streamlit Cloud
-
-# -----------------------------
-# Page Config
-# -----------------------------
+# ====================== PAGE CONFIG ======================
 st.set_page_config(
     page_title="Lumina • AI Mobile Advisor",
     page_icon="📱",
     layout="wide",
     initial_sidebar_state="expanded",
-    menu_items={
-        'Get Help': 'https://github.com',
-        'Report a bug': 'https://github.com',
-    }
 )
 
-# -----------------------------
-# Premium Futuristic Styling (Glassmorphism + Neon)
-# -----------------------------
+# ====================== PREMIUM STYLING ======================
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
-    
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
     .stApp {
-        background: linear-gradient(135deg, #0a0a0f 0%, #1a0f2e 50%, #0f172a 100%);
-        color: #e0e7ff;
+        background: #0F172A;
+        color: #FFFFFF;
         font-family: 'Inter', sans-serif;
     }
-    
+
+    /* Hero Title */
     .main-title {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 4.2rem;
+        font-size: 4.5rem;
         font-weight: 700;
-        background: linear-gradient(90deg, #c026d3, #7c3aed, #db2777);
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6, #22D3EE);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
         letter-spacing: -3px;
-        margin-bottom: 0.2rem;
+        margin-bottom: 0.5rem;
     }
-    
+
     .subtitle {
         text-align: center;
-        color: #94a3b8;
-        font-size: 1.35rem;
-        max-width: 680px;
-        margin: 0 auto 2.5rem;
+        color: #94A3B8;
+        font-size: 1.4rem;
+        max-width: 700px;
+        margin: 0 auto 2rem;
     }
 
     /* Glassmorphism Cards */
     .glass-card {
-        background: rgba(255, 255, 255, 0.06);
+        background: rgba(51, 65, 85, 0.6);
         backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(148, 163, 184, 0.15);
         border-radius: 24px;
-        padding: 24px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        padding: 28px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
     }
 
-    /* Chat Bubbles */
+    /* Chat Messages */
     .stChatMessage {
-        border-radius: 22px;
+        border-radius: 20px;
         padding: 18px 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-        border: 1px solid rgba(255,255,255,0.08);
-        transition: transform 0.2s ease;
+        margin-bottom: 18px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(148, 163, 184, 0.1);
+        transition: all 0.3s ease;
     }
-    
+
     .stChatMessage:hover {
-        transform: translateY(-2px);
+        transform: translateY(-3px);
     }
-    
+
     .stChatMessage[data-testid="stChatMessage"][role="user"] {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        background: linear-gradient(135deg, #3B82F6, #6366F1);
         color: white;
-        margin-left: 15%;
+        margin-left: 12%;
     }
-    
+
     .stChatMessage[data-testid="stChatMessage"][role="assistant"] {
-        background: rgba(30, 27, 55, 0.85);
-        color: #e0e7ff;
-        margin-right: 15%;
+        background: #1E293B;
+        color: #E2E8F0;
+        margin-right: 12%;
+    }
+
+    /* Buttons */
+    .stButton button {
+        border-radius: 16px;
+        height: 52px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stButton button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
     }
 
     /* Sidebar */
     section[data-testid="stSidebar"] {
-        background: rgba(15, 15, 30, 0.95) !important;
-        backdrop-filter: blur(16px);
-    }
-    
-    .sidebar .stButton button {
-        border-radius: 16px;
-        height: 52px;
-        font-weight: 600;
-        background: rgba(30, 30, 50, 0.8);
-        border: 1px solid #6366f1;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .sidebar .stButton button:hover {
-        background: #6366f1;
-        transform: scale(1.03);
-        color: white;
+        background: #1E293B !important;
+        border-right: 1px solid rgba(148, 163, 184, 0.1);
     }
 
-    /* Input */
+    /* Input Field */
     .stChatInput input {
-        background: rgba(30, 30, 50, 0.9) !important;
-        color: #e0e7ff !important;
-        border: 2px solid #6366f1 !important;
+        background: #1E293B !important;
+        color: #FFFFFF !important;
+        border: 2px solid #3B82F6 !important;
         border-radius: 9999px;
         padding: 16px 24px;
         font-size: 1.05rem;
     }
 
-    /* Status */
-    .status-bar {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        background: rgba(15, 23, 42, 0.95);
-        backdrop-filter: blur(12px);
-        padding: 10px 20px;
+    /* Quick Pills */
+    .pill-button {
+        background: #334155;
+        border: 1px solid #475569;
+        color: #CBD5E1;
         border-radius: 50px;
-        border: 1px solid #6366f1;
-        font-size: 0.9rem;
-        z-index: 1000;
-        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        padding: 12px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .pill-button:hover {
+        background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
     }
 
     h1, h2, h3, label {
-        color: #e0e7ff !important;
+        color: #FFFFFF !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
-# Helper Functions
-# -----------------------------
+# ====================== HELPERS ======================
 def analyze_sentiment(text):
-    if not TextBlob:
-        return "neutral"
     try:
         polarity = TextBlob(text).sentiment.polarity
-        if polarity > 0.2: return "positive"
-        elif polarity < -0.2: return "negative"
+        if polarity > 0.2:
+            return "positive"
+        elif polarity < -0.2:
+            return "negative"
         return "neutral"
     except:
         return "neutral"
 
 def detect_intent(text):
     text = text.lower()
-    if any(w in text for w in ["hi", "hello", "hey"]):
+    if any(w in text for w in ["hi", "hello", "hey", "assalam"]):
         return "greeting"
-    elif any(w in text for w in ["price", "cost", "how much"]):
+    elif any(w in text for w in ["price", "cost", "how much", "rate"]):
         return "price_inquiry"
-    elif any(w in text for w in ["spec", "specification", "features"]):
+    elif any(w in text for w in ["spec", "specification", "features", "detail"]):
         return "specification_request"
-    elif any(w in text for w in ["recommend", "best", "suggest"]):
+    elif any(w in text for w in ["recommend", "best", "suggest", "good"]):
         return "recommendation"
     elif any(w in text for w in ["compare", "vs", "versus"]):
         return "comparison"
     return "general_query"
 
-# -----------------------------
-# Session State
-# -----------------------------
+# ====================== SESSION STATE ======================
 if "messages" not in st.session_state:
     st.session_state.messages = [{
         "role": "assistant",
-        "content": "Hello! I'm Lumina — your intelligent AI mobile advisor. How can I help you discover the perfect smartphone today?"
+        "content": "Hello! I'm **Lumina** — your intelligent AI mobile advisor. How can I help you find the perfect smartphone today?"
     }]
 
-# -----------------------------
-# Hero Header
-# -----------------------------
-col1, col2, col3 = st.columns([1, 5, 1])
+# ====================== HERO SECTION ======================
+col1, col2, col3 = st.columns([1, 6, 1])
 with col2:
     st.markdown('<h1 class="main-title">LUMINA</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="subtitle">Futuristic AI Mobile Advisor • Powered by Groq • Jarvis Intelligence</p>', unsafe_allow_html=True)
+    st.markdown('<p class="subtitle">Premium AI Mobile Advisor • Real-time Intelligence • Powered by Groq</p>', unsafe_allow_html=True)
 
-# Quick Action Pills
+# ====================== QUICK PROMPTS ======================
 st.markdown("### Popular Searches")
 pill_cols = st.columns(5)
+
 quick_prompts = [
-    ("🔥 Top Flagships", "Recommend the best flagship phones 2026"),
-    ("💰 Under 50K", "Best phones under 50000 PKR"),
-    ("📸 Camera Kings", "Best camera phones for photography"),
-    ("⚡ Gaming", "Best gaming phones with high refresh rate"),
-    ("🌟 Value Picks", "Best value for money smartphones")
+    ("🔥 Top Flagships 2026", "Recommend the best flagship phones in 2026"),
+    ("💰 Under 50K", "Best smartphones under 50000 PKR"),
+    ("📸 Camera Kings", "Best camera phones for photography in Pakistan"),
+    ("⚡ Gaming Beast", "Best gaming phones with high refresh rate"),
+    ("🌟 Value Picks", "Best value for money smartphones right now")
 ]
 
 for i, (label, prompt) in enumerate(quick_prompts):
     with pill_cols[i]:
-        if st.button(label, use_container_width=True, key=f"pill_{i}"):
+        if st.button(label, key=f"pill_{i}", use_container_width=True):
             st.session_state.quick_prompt = prompt
 
 st.divider()
 
-# -----------------------------
-# Main Chat Area
-# -----------------------------
+# ====================== CHAT INTERFACE ======================
 chat_container = st.container()
 
 with chat_container:
@@ -270,67 +205,56 @@ with chat_container:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-# -----------------------------
-# Sidebar - Premium Navigation
-# -----------------------------
+# ====================== SIDEBAR ======================
 with st.sidebar:
-    st.markdown("### ✨ Explore")
-    
+    st.markdown("### Navigation")
     st.button("🏠 Home", use_container_width=True)
-    st.button("📱 All Phones", use_container_width=True)
+    st.button("📱 All Smartphones", use_container_width=True)
     st.button("🔍 Compare Phones", use_container_width=True)
     st.button("📸 Camera Hub", use_container_width=True)
     st.button("🎮 Gaming Zone", use_container_width=True)
-    
-    st.divider()
-    st.markdown("### 🎙️ Voice Settings")
-    voice_enabled = st.toggle("Enable Jarvis Voice", value=False)  # Default off for cloud
-    
-    st.divider()
-    if st.button("🗑️ Clear Conversation", use_container_width=True, type="secondary"):
-        st.session_state.messages = []
-        st.rerun()
+    st.button("💎 Premium Picks", use_container_width=True)
 
     st.divider()
-    st.caption("Lumina v2.1 • Premium AI Experience")
+    st.markdown("### Settings")
+    st.caption("Lumina v2.2 • Premium Experience")
 
-# -----------------------------
-# Chat Input
-# -----------------------------
-prompt = st.chat_input("Ask about any smartphone...")
+# ====================== CHAT INPUT ======================
+prompt = st.chat_input("Ask anything about smartphones...")
 
 if "quick_prompt" in st.session_state and st.session_state.quick_prompt:
     prompt = st.session_state.quick_prompt
     del st.session_state.quick_prompt
 
 if prompt:
+    # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     
     with chat_container:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-    # NLP Insights
+    # Analysis
     sentiment = analyze_sentiment(prompt)
     intent = detect_intent(prompt)
 
-    system_prompt = f"""You are Lumina, a premium, witty, and highly knowledgeable AI mobile advisor with a Jarvis-like personality.
-    Speak elegantly and professionally. Use emojis tastefully.
-    Current user sentiment: {sentiment}
+    system_prompt = f"""You are Lumina, a premium, witty, and highly knowledgeable AI mobile advisor.
+    Speak elegantly with a touch of personality. Use emojis tastefully.
+    Current sentiment: {sentiment}
     Detected intent: {intent}
-    Always include key specifications and current price ranges in PKR when recommending phones.
-    """
+    Always mention key specs and current price ranges in PKR when recommending phones."""
 
+    # Assistant response
     with chat_container:
         with st.chat_message("assistant"):
             if not client:
-                full_response = "⚠️ Groq API key is missing. Please configure it in your .env file."
-                st.error(full_response)
+                st.error("⚠️ Groq API key is missing. Please check your .env file.")
+                full_response = "API configuration error."
             else:
                 with st.spinner("Lumina is thinking..."):
                     try:
                         stream = client.chat.completions.create(
-                            model="llama-3.1-8b-instant",
+                            model="llama-3.1-70b-versatile",
                             messages=[
                                 {"role": "system", "content": system_prompt},
                                 {"role": "user", "content": prompt}
@@ -339,32 +263,19 @@ if prompt:
                             max_tokens=1024,
                             stream=True
                         )
-                        
+
                         response_placeholder = st.empty()
                         full_response = ""
-                        
+
                         for chunk in stream:
                             if chunk.choices[0].delta.content:
                                 full_response += chunk.choices[0].delta.content
                                 response_placeholder.markdown(full_response + "▌")
-                        
+
                         response_placeholder.markdown(full_response)
-                        
-                        if voice_enabled:
-                            text_to_speech(full_response)
-                            
                     except Exception as e:
                         full_response = f"Error: {str(e)}"
                         st.error(full_response)
 
     st.session_state.messages.append({"role": "assistant", "content": full_response})
     st.rerun()
-
-# -----------------------------
-# Status Bar
-# -----------------------------
-st.markdown(f"""
-<div class="status-bar">
-    🟢 Lumina Online • Groq Powered • Voice: {'ON' if voice_enabled else 'OFF'}
-</div>
-""", unsafe_allow_html=True)
