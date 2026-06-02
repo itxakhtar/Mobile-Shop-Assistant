@@ -218,19 +218,22 @@ with st.sidebar:
     st.caption("Designed with ❤️ for mobile enthusiasts")
 
 # -----------------------------
-# NLP Functions (unchanged)
+# NLP Functions
 # -----------------------------
 def analyze_sentiment(text):
     try:
         polarity = TextBlob(text).sentiment.polarity
-        if polarity > 0.2: return "positive"
-        elif polarity < -0.2: return "negative"
+        if polarity > 0.2:
+            return "positive"
+        elif polarity < -0.2:
+            return "negative"
         return "neutral"
     except:
         return "neutral"
 
 def extract_entities(text):
-    if nlp is None: return []
+    if nlp is None:
+        return []
     try:
         doc = nlp(text)
         return [(ent.text, ent.label_) for ent in doc.ents]
@@ -261,4 +264,119 @@ if "messages" not in st.session_state:
         "role": "assistant",
         "content": "Hello! I'm Lumina, your personal premium mobile assistant. How may I help you find your perfect smartphone today? 📱✨",
         "nlp_insights": {"sentiment": "positive", "intent": "greeting", "entities": []}
-   
+    }]
+
+if "quick_prompt" not in st.session_state:
+    st.session_state.quick_prompt = ""
+
+# -----------------------------
+# Display Chat History
+# -----------------------------
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+        if msg["role"] == "assistant" and "nlp_insights" in msg:
+            with st.expander("🔍 Analysis", expanded=False):
+                st.json(msg["nlp_insights"])
+
+# -----------------------------
+# Chat Input & Logic
+# -----------------------------
+prompt = st.chat_input("Ask anything about smartphones... (Lumina will respond with voice)")
+
+# Handle quick prompts
+if st.session_state.quick_prompt:
+    prompt = st.session_state.quick_prompt
+    st.session_state.quick_prompt = ""
+
+if prompt:
+    # Add user message
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # NLP Analysis
+    sentiment = analyze_sentiment(prompt)
+    entities = extract_entities(prompt)
+    intent = detect_intent(prompt)
+
+    nlp_insights = {
+        "sentiment": sentiment,
+        "intent": intent,
+        "entities": [{"text": e[0], "label": e[1]} for e in entities]
+    }
+
+    system_prompt = f"""You are Lumina, a premium and knowledgeable mobile shop assistant with Jarvis-like personality.
+    Current Sentiment: {sentiment}
+    Detected Intent: {intent}
+
+    Guidelines:
+    - Be elegant, professional, and helpful like Jarvis from Iron Man
+    - Use emojis tastefully (📱, 🔥, 💰, ⚡, 📸)
+    - When comparing phones, use beautiful markdown tables
+    - Always mention key specs: Processor, RAM, Storage, Display, Camera, Battery
+    - Keep responses conversational but informative
+    - Be friendly and enthusiastic for greetings
+    - For farewells, end politely
+    """
+
+    with st.chat_message("assistant"):
+        if not client:
+            st.error("Groq API key not found! Please add it to .env file")
+            full_response = "⚠️ I need a valid Groq API key to work. Please check your configuration."
+        else:
+            try:
+                with st.spinner("Lumina is thinking..."):
+                    stream = client.chat.completions.create(
+                        model="llama-3.1-8b-instant",
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.75,
+                        max_tokens=1024,
+                        stream=True
+                    )
+
+                    response_placeholder = st.empty()
+                    full_response = ""
+
+                    for chunk in stream:
+                        if chunk.choices[0].delta.content:
+                            full_response += chunk.choices[0].delta.content
+                            response_placeholder.markdown(full_response + "▌")
+
+                    response_placeholder.markdown(full_response)
+                    
+                    # Jarvis Voice Response
+                    if voice_enabled and full_response and len(full_response) > 10:
+                        text_to_speech(full_response)
+
+            except Exception as e:
+                full_response = f"⚠️ I encountered an error: {str(e)}"
+                st.error(full_response)
+
+    # Add assistant message to history
+    st.session_state.messages.append({
+        "role": "assistant",
+        "content": full_response,
+        "nlp_insights": nlp_insights
+    })
+
+    st.rerun()
+
+# Jarvis Status Indicator
+status_text = "🟢 Jarvis Active"
+if not client:
+    status_text = "🔴 API Missing"
+elif voice_enabled:
+    status_text = "🟢 Jarvis Active | Voice ON"
+else:
+    status_text = "🟡 Jarvis Active | Voice OFF"
+
+st.markdown(f"""
+<div class="jarvis-status">
+    {status_text}
+</div>
+""", unsafe_allow_html=True)
