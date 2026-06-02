@@ -98,7 +98,7 @@ st.markdown("""
         cursor: pointer;
         transition: all 0.3s ease;
         border: 1px solid rgba(148, 163, 184, 0.15);
-        color: #E2E8F0 !important;
+        color: #FFFFFF !important;
         font-weight: 500;
     }
 
@@ -106,40 +106,54 @@ st.markdown("""
         background: linear-gradient(90deg, #3B82F6, #8B5CF6);
         color: #FFFFFF !important;
         transform: translateX(8px);
-        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
     }
 
-    /* Popular Searches */
-    .popular-card {
-        background: #334155;
+    /* ==================== POPULAR SEARCHES FIX ==================== */
+    .popular-card button {
+        background: #334155 !important;
+        color: #FFFFFF !important;
+        border: 1px solid #475569 !important;
         border-radius: 18px;
-        padding: 16px 20px;
-        text-align: center;
-        border: 1px solid #475569;
-        transition: all 0.3s ease;
+        padding: 18px 20px;
+        font-size: 1.02rem;
+        font-weight: 600;
+        width: 100%;
         height: 100%;
-        color: #E2E8F0 !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
-    .popular-card:hover {
-        background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+    .popular-card button:hover {
+        background: linear-gradient(135deg, #3B82F6, #8B5CF6) !important;
         color: #FFFFFF !important;
         transform: translateY(-6px);
+        border-color: #60A5FA;
+        box-shadow: 0 12px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    /* Active / Clicked State */
+    .popular-card button:active,
+    .popular-card button:focus,
+    .popular-card button[data-testid="stButton"] {
+        background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+        color: #FFFFFF !important;
         border-color: #3B82F6;
     }
 
-    /* Buttons */
-    .stButton button {
-        border-radius: 16px;
-        height: 52px;
-        font-weight: 600;
-        transition: all 0.3s ease;
+    /* Force white text in ALL states */
+    .popular-card button * {
         color: #FFFFFF !important;
     }
 
-    .stButton button:hover {
-        transform: scale(1.04);
-        box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+    .popular-card button:hover *,
+    .popular-card button:active *,
+    .popular-card button:focus * {
+        color: #FFFFFF !important;
+    }
+
+    /* Streamlit defaults override */
+    .stButton button, .stButton button p, .stButton button span {
+        color: #FFFFFF !important;
     }
 
     /* Input */
@@ -155,25 +169,24 @@ st.markdown("""
         color: #94A3B8 !important;
     }
 
-    /* Responsive Adjustments */
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .main-title { font-size: 3.4rem !important; }
+    }
+
     @media (max-width: 768px) {
-        .main-title { font-size: 2.8rem !important; letter-spacing: -1px; }
-        .subtitle { font-size: 1.1rem !important; }
+        .main-title { font-size: 2.8rem !important; }
+        .subtitle { font-size: 1.15rem !important; }
         .stChatMessage { margin-left: 0 !important; margin-right: 0 !important; }
-        .pill_cols { flex-direction: column; }
     }
 
     @media (max-width: 480px) {
         .main-title { font-size: 2.4rem !important; }
     }
 
-    /* High Contrast Fixes */
-    h1, h2, h3, label, p, span, div {
+    /* High Contrast Guarantees */
+    h1, h2, h3, label, p, span, div, li {
         color: #FFFFFF !important;
-    }
-
-    .stMarkdown, .stMarkdown p, .stMarkdown li {
-        color: #E2E8F0 !important;
     }
 
     section[data-testid="stSidebar"] * {
@@ -219,8 +232,9 @@ with col2:
     st.markdown('<h1 class="main-title">LUMINA</h1>', unsafe_allow_html=True)
     st.markdown('<p class="subtitle">Premium AI Mobile Advisor • Powered by Groq • Real-time Intelligence</p>', unsafe_allow_html=True)
 
-# ====================== POPULAR SEARCHES (Modern Cards) ======================
+# ====================== POPULAR SEARCHES (Fixed) ======================
 st.markdown("### Popular Searches")
+
 cols = st.columns(5)
 
 quick_prompts = [
@@ -233,8 +247,10 @@ quick_prompts = [
 
 for i, (label, prompt) in enumerate(quick_prompts):
     with cols[i]:
+        st.markdown('<div class="popular-card">', unsafe_allow_html=True)
         if st.button(label, key=f"pill_{i}", use_container_width=True):
             st.session_state.quick_prompt = prompt
+        st.markdown('</div>', unsafe_allow_html=True)
 
 st.divider()
 
@@ -245,10 +261,9 @@ with chat_container:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-# ====================== SIDEBAR - Modern Navigation Cards ======================
+# ====================== SIDEBAR ======================
 with st.sidebar:
     st.markdown("### Navigation")
-    
     nav_items = [
         ("🏠 Home", "home"),
         ("📱 All Smartphones", "phones"),
@@ -268,7 +283,7 @@ with st.sidebar:
     st.divider()
     st.markdown("### Settings")
     st.checkbox("🔊 Enable Voice Response", value=False)
-    st.caption("Lumina v2.3 • Premium SaaS Experience")
+    st.caption("Lumina v2.4 • Premium SaaS Experience")
 
 # ====================== CHAT INPUT ======================
 prompt = st.chat_input("Ask anything about smartphones...")
